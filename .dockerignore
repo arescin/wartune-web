@@ -1,0 +1,6 @@
+res/
+.git/
+.playwright-mcp/
+server.js
+*.orig
+*.log

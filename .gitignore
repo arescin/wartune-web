@@ -1,0 +1,6 @@
+res/
+node_modules/
+.playwright-mcp/
+server.js
+*.orig
+*.log
