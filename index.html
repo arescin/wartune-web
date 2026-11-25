@@ -14,12 +14,12 @@
     function post(kind, msg) { try { fetch('/clientlog', { method: 'POST', body: JSON.stringify({ kind: kind, msg: String(msg).slice(0, 4000), t: Date.now(), ua: navigator.userAgent }), keepalive: true }).catch(function () {}); } catch (e) {} }
     window.addEventListener('error', function (e) { post('error', (e.message || e) + ' @ ' + (e.filename || '') + ':' + (e.lineno || '') + (e.error && e.error.stack ? ' | ' + e.error.stack : '')); });
     window.addEventListener('unhandledrejection', function (e) { post('rejection', e.reason && (e.reason.stack || e.reason)); });
-    // the game's own console output (first 600 lines per page load) and page unloads (self-reloads)
+    // Forward only errors (up to 50 per load) to avoid flooding /clientlog
     var n = 0;
-    ['log', 'info', 'warn', 'error'].forEach(function (lv) {
+    ['error'].forEach(function (lv) {
       var orig = console[lv];
       console[lv] = function () {
-        if (n++ < 600) { try { post('console.' + lv, Array.prototype.map.call(arguments, function (a) { try { return typeof a === 'string' ? a : (a && a.stack) || JSON.stringify(a); } catch (e) { return String(a); } }).join(' ')); } catch (e) {} }
+        if (n++ < 50) { try { post('console.' + lv, Array.prototype.map.call(arguments, function (a) { try { return typeof a === 'string' ? a : (a && a.stack) || JSON.stringify(a); } catch (e) { return String(a); } }).join(' ')); } catch (e) {} }
         return orig.apply(console, arguments);
       };
     });
